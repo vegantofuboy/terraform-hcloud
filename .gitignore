@@ -34,4 +34,4 @@ override.tf.json
 terraform.rc
 
 # ansible inventory
-.ini
+*.ini
