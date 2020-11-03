@@ -11,7 +11,7 @@ resource "hcloud_ssh_key" "default" {
   public_key = file(var.public_key)
 }
 
-// network configuration
+// Network configuration
 resource "hcloud_network" "network" {
   name     = "network"
   ip_range = "10.10.0.0/16"
@@ -30,7 +30,7 @@ resource "hcloud_network_route" "route" {
   network_id  = hcloud_network.network.id
 }
 
-// Create a Kubernetes Master
+// Create a Master
 resource "hcloud_server" "master" {
   count       = var.master_count
   name        = format("%s-%03d", var.server_name_master, count.index + 1)
@@ -57,12 +57,12 @@ resource "hcloud_server" "master" {
   echo "[hcolud]" | tee -a hcloud.ini;
   echo "${self.ipv4_address} ansible_user=${var.ansible_user} ansible_ssh_private_key_file=${var.private_key}" | tee -a hcloud.ini;
     export ANSIBLE_HOST_KEY_CHECKING=False;
-  ansible-playbook -u ${var.ansible_user} --private-key ${var.private_key} -i hcloud.ini ../ansible/baseline.yml
+  ansible-playbook -u ${var.ansible_user} --private-key ${var.private_key} -i hcloud.ini ../ansible/ansible-role-baseline.yml
   EOT
   }
 }
 
-// Create a kubernetes node
+// Create a Node
 resource "hcloud_server" "node" {
   count       = var.node_count
   name        = format("%s-%03d", var.server_name_node, count.index + 1)
@@ -89,7 +89,7 @@ resource "hcloud_server" "node" {
   echo "[hcolud]" | tee -a hcloud.ini;
   echo "${self.ipv4_address} ansible_user=${var.ansible_user} ansible_ssh_private_key_file=${var.private_key}" | tee -a hcloud.ini;
     export ANSIBLE_HOST_KEY_CHECKING=False;
-  ansible-playbook -u ${var.ansible_user} --private-key ${var.private_key} -i hcloud.ini ../ansible/baseline.yml
+  ansible-playbook -u ${var.ansible_user} --private-key ${var.private_key} -i hcloud.ini ../ansible/ansible-role-baseline.yml
   EOT
   }
 }
@@ -107,7 +107,7 @@ resource "hcloud_server_network" "network_node" {
   ip         = cidrhost(hcloud_network_subnet.sub.ip_range, count.index + 10)
 }
 
-// The Ansible inventory file
+// The Ansible inventoryfile
 resource "local_file" "AnsibleInventory" {
   content = templatefile("inventory.tmpl",
     {
